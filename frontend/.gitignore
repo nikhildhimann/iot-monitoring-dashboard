@@ -1,11 +1,10 @@
 node_modules/
+.next/
+out/
 .env
 .env.*
 !.env.example
-.codex/
 coverage/
 dist/
 build/
 *.log
-*.pyc
-__pycache__/
