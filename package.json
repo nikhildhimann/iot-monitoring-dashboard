@@ -2,7 +2,7 @@
   "name": "Nikhil Dhiman",
   "private": true,
   "version": "1.0.0",
-  "description": "Monorepo helper scripts for the Amrik frontend and backend",
+  "description": "Monorepo helper scripts for the Nikhil Dhiman frontend and backend",
   "engines": {
     "node": ">=20.0.0"
   },

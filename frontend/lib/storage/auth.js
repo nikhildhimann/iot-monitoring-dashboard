@@ -1,4 +1,4 @@
-const AUTH_STORAGE_KEY = "amrik_auth";
+const AUTH_STORAGE_KEY = "Nikhil Dhiman_auth";
 
 const isBrowser = () => typeof window !== "undefined";
 

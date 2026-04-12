@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Backend foundation for the Amrik IoT monitoring project",
+  "description": "Backend foundation for the Nikhil Dhiman IoT monitoring project",
   "type": "module",
   "main": "src/server.js",
   "engines": {

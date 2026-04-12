@@ -56,7 +56,7 @@ app.get(HEALTH_ROUTE, (req, res) => {
 
 apiRouter.get("/", (req, res) => {
   return sendResponse(res, {
-    message: "Amrik IoT backend is running",
+    message: "IoT backend is running",
     data: {
       version: "v1",
       basePath: API_PREFIX,
