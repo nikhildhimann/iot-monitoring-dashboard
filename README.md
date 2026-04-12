@@ -36,15 +36,34 @@ It is designed for scenarios where operators need a live view of connected hardw
 
 ## Demo Architecture
 
-```mermaid
-flowchart LR
-  A[ESP32 / Sensor Device] -->|POST /api/readings| B[Express API]
-  B --> C[(MongoDB)]
-  B --> D[Alert Engine]
-  D --> C
-  B --> E[Socket.IO Server]
-  E --> F[Next.js Dashboard]
-  C --> F
+```text
++-----------------------+
+| ESP32 / Sensor Device |
++-----------------------+
+            |
+            | POST /api/readings
+            v
++------------------------+
+| Express API + SocketIO |
++------------------------+
+        |           |
+        |           | realtime events
+        |           v
+        |    +------------------+
+        |    | Next.js Dashboard|
+        |    +------------------+
+        |
+        v
++------------------+
+| MongoDB Database |
++------------------+
+        ^
+        |
+        | alerts, device state, readings
+        |
++------------------+
+|   Alert Engine   |
++------------------+
 ```
 
 ## Core Features
