@@ -10,14 +10,14 @@ import {
 
 const liveFields = [
   { key: "deviceId", label: "Device ID", format: (value) => value || "--" },
-  { key: "weight", label: "Weight", format: formatWeight },
-  { key: "vibration", label: "Vibration", format: formatBoolean },
-  { key: "buzzerOn", label: "Buzzer", format: formatBoolean },
-  { key: "ledOn", label: "LED", format: formatBoolean },
-  { key: "wifiSignal", label: "WiFi Signal", format: formatWifiSignal },
-  { key: "uptime", label: "Uptime", format: formatUptime },
+  { key: "weight", label: "Current Weight", format: formatWeight },
+  { key: "vibration", label: "Vibration Detection", format: formatBoolean },
+  { key: "buzzerOn", label: "Buzzer Status", format: formatBoolean },
+  { key: "ledOn", label: "LED Indicator", format: formatBoolean },
+  { key: "wifiSignal", label: "WiFi Strength", format: formatWifiSignal },
+  { key: "uptime", label: "System Uptime", format: formatUptime },
   { key: "ipAddress", label: "IP Address", format: (value) => value || "--" },
-  { key: "lastReadingAt", label: "Last Reading", format: formatDateTime },
+  { key: "lastReadingAt", label: "Last Reported", format: formatDateTime },
 ];
 
 export default function LiveStatusCard({ device, isLoading = false }) {
@@ -26,26 +26,32 @@ export default function LiveStatusCard({ device, isLoading = false }) {
   return (
     <section className="dashboard-card">
       <div className="dashboard-card-header">
-        <h2 className="dashboard-card-title">Live Status</h2>
+        <h2 className="dashboard-card-title">Live Telemetry</h2>
         {device && (
-          <div className={`status-badge ${isOnline ? "status-online" : "status-offline"}`}>
-            {isOnline ? "Online" : "Offline"}
-          </div>
+          <span className={`status-badge ${isOnline ? "status-online" : "status-offline"}`} style={{ fontSize: '0.8rem', padding: '0.4rem 1rem' }}>
+            {isOnline ? "• System Online" : "• System Offline"}
+          </span>
         )}
       </div>
 
-      {isLoading ? <p className="dashboard-loading">Loading latest device state...</p> : null}
+      {isLoading ? (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p className="dashboard-loading">Syncing with hardware...</p>
+        </div>
+      ) : null}
 
       {!isLoading && !device ? (
-        <p className="dashboard-list-empty">Select a device to see live status.</p>
+        <div className="dashboard-list-empty">
+          <p>Please select a device from the selector to begin monitoring.</p>
+        </div>
       ) : null}
 
       {!isLoading && device ? (
         <div className="device-meta-grid">
           {liveFields.map((field) => (
             <div key={field.key} className="device-meta-item">
-              <p className="device-meta-label">{field.label}</p>
-              <p className="device-meta-value">{field.format(device[field.key])}</p>
+              <span className="device-meta-label">{field.label}</span>
+              <span className="device-meta-value">{field.format(device[field.key])}</span>
             </div>
           ))}
         </div>

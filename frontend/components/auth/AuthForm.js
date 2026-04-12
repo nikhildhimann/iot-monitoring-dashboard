@@ -36,47 +36,50 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
   };
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="auth-form">
       {isSignup ? (
         <div className="auth-field">
-          <label className="auth-label" htmlFor="name">Name</label>
+          <label htmlFor="name" className="auth-label">Name</label>
           <input
-            className="auth-input"
             id="name"
             name="name"
             type="text"
+            className="auth-input"
             value={formValues.name}
             onChange={handleChange}
             disabled={isSubmitting}
+            placeholder="John Doe"
             required
           />
         </div>
       ) : null}
 
       <div className="auth-field">
-        <label className="auth-label" htmlFor="email">Email</label>
+        <label htmlFor="email" className="auth-label">Email Address</label>
         <input
-          className="auth-input"
           id="email"
           name="email"
           type="email"
+          className="auth-input"
           value={formValues.email}
           onChange={handleChange}
           disabled={isSubmitting}
+          placeholder="name@example.com"
           required
         />
       </div>
 
       <div className="auth-field">
-        <label className="auth-label" htmlFor="password">Password</label>
+        <label htmlFor="password" className="auth-label">Password</label>
         <input
-          className="auth-input"
           id="password"
           name="password"
           type="password"
+          className="auth-input"
           value={formValues.password}
           onChange={handleChange}
           disabled={isSubmitting}
+          placeholder="••••••••"
           minLength={8}
           required
         />
@@ -84,8 +87,8 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
 
       {error ? <p className="auth-error">{error}</p> : null}
 
-      <button className="auth-submit" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Please wait..." : isSignup ? "Create Account" : "Login"}
+      <button type="submit" className="auth-submit" disabled={isSubmitting}>
+        {isSubmitting ? "Processing..." : isSignup ? "Get Started" : "Sign In"}
       </button>
     </form>
   );

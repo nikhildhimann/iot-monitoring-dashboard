@@ -37,16 +37,19 @@ export default function SignupPage() {
   return (
     <main className="page-shell auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Signup</h1>
+        <h1 className="auth-title">Create Account</h1>
+        <p className="auth-subtitle">Join us to start monitoring your IoT data</p>
+
         <AuthForm
           mode="signup"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           error={error}
         />
-        <p className="auth-footer">
-          Already have an account? <Link className="auth-link" href="/login">Login here</Link>
-        </p>
+
+        <div className="auth-footer">
+          Already have an account? <Link href="/login" className="auth-link">Login here</Link>
+        </div>
       </div>
     </main>
   );

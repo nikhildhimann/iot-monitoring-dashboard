@@ -7,10 +7,10 @@ export default function DeviceSelector({
   disabled = false,
 }) {
   return (
-    <div className="dashboard-card">
-      <h2 className="dashboard-card-title">Device Selector</h2>
+    <div className="device-selector-card">
+      <span className="device-selector-label">Active Device:</span>
       <select
-        className="dashboard-select"
+        className="dashboard-select device-selector-select"
         value={selectedDeviceId}
         onChange={(event) => onDeviceChange(event.target.value)}
         disabled={disabled || devices.length === 0}
@@ -18,7 +18,7 @@ export default function DeviceSelector({
         {devices.length === 0 ? <option value="">No devices available</option> : null}
         {devices.map((device) => (
           <option key={device.deviceId} value={device.deviceId}>
-            {device.deviceId}
+            {device.deviceId} {device.status === 'online' ? '(Online)' : '(Offline)'}
           </option>
         ))}
       </select>

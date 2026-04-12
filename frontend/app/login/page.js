@@ -38,16 +38,19 @@ export default function LoginPage() {
   return (
     <main className="page-shell auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Login</h1>
+        <h1 className="auth-title">Welcome Back</h1>
+        <p className="auth-subtitle">Log in to manage your IoT devices</p>
+        
         <AuthForm
           mode="login"
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           error={error}
         />
-        <p className="auth-footer">
-          Don&apos;t have an account? <Link className="auth-link" href="/signup">Create one</Link>
-        </p>
+        
+        <div className="auth-footer">
+          Don&apos;t have an account? <Link href="/signup" className="auth-link">Create one</Link>
+        </div>
       </div>
     </main>
   );

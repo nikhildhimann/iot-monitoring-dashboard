@@ -28,13 +28,13 @@ export default function AlertsList({
           className={`dashboard-tab ${activeTab === "open" ? "active" : ""}`}
           onClick={() => onTabChange("open")}
         >
-          Open Alerts
+          Open
         </button>
         <button
           className={`dashboard-tab ${activeTab === "history" ? "active" : ""}`}
           onClick={() => onTabChange("history")}
         >
-          Alert History
+          History
         </button>
       </div>
 
@@ -49,31 +49,32 @@ export default function AlertsList({
           <div className="dashboard-list">
             {alerts.map((alert) => (
               <article key={alert._id} className="dashboard-list-item">
-                <div className="dashboard-list-row">
+                <div className="dashboard-list-row" style={{ marginBottom: '0.5rem' }}>
                   <p className="dashboard-list-title">{alert.type}</p>
-                  <div className="dashboard-list-actions">
-                    <span className={`status-badge status-${alert.status}`}>
-                      {alert.status}
-                    </span>
-                    {activeTab === "open" && alert.status === "open" && (
-                      <button className="dashboard-list-action" onClick={() => onClear(alert._id)}>
-                        Clear
-                      </button>
-                    )}
-                  </div>
+                  <span className={`status-badge status-${alert.status}`}>
+                    {alert.status}
+                  </span>
                 </div>
-                <p className="dashboard-list-subtitle">{alert.message}</p>
-                <div className="dashboard-list-row">
-                  <p className="dashboard-list-meta">Severity: {alert.severity}</p>
-                  <div className="alert-timestamps">
-                    <p className="dashboard-list-meta">Triggered: {formatDateTime(alert.triggeredAt)}</p>
-                    {alert.status === "resolved" && alert.resolvedAt && (
-                      <p className="dashboard-list-meta">Resolved: {formatDateTime(alert.resolvedAt)}</p>
-                    )}
-                    {alert.status === "cleared" && alert.clearedAt && (
-                      <p className="dashboard-list-meta">Cleared: {formatDateTime(alert.clearedAt)}</p>
-                    )}
+                
+                <div className="dashboard-list-content">
+                  <p className="dashboard-list-subtitle">{alert.message}</p>
+                  
+                  <div className="dashboard-list-row" style={{ marginTop: '0.75rem', alignItems: 'flex-end' }}>
+                    <div>
+                        <p className="dashboard-list-meta">Severity: <span style={{ fontWeight: 600, color: 'var(--foreground)' }}>{alert.severity}</span></p>
+                    </div>
+                    <div className="alert-timestamps" style={{ textAlign: 'right' }}>
+                      <p className="dashboard-list-meta">{formatDateTime(alert.triggeredAt)}</p>
+                    </div>
                   </div>
+
+                  {activeTab === "open" && alert.status === "open" && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <button className="dashboard-list-action" onClick={() => onClear(alert._id)}>
+                        Mark as Resolved
+                      </button>
+                    </div>
+                  )}
                 </div>
               </article>
             ))}

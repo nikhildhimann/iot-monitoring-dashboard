@@ -17,7 +17,7 @@ export default function ReadingHistory({
   return (
     <section className="dashboard-card">
       <div className="dashboard-card-header">
-        <h2 className="dashboard-card-title">Reading History</h2>
+        <h2 className="dashboard-card-title">History Logs</h2>
       </div>
 
       <div className="dashboard-filters">
@@ -28,12 +28,24 @@ export default function ReadingHistory({
             value={filters.vibration}
             onChange={(e) => handleFilterChange("vibration", e.target.value)}
           >
-            <option value="">All</option>
-            <option value="true">Detected</option>
-            <option value="false">None</option>
+            <option value="">All Readings</option>
+            <option value="true">Detected Only</option>
+            <option value="false">Clear Only</option>
           </select>
         </div>
 
+        <div className="filter-group">
+          <label className="filter-label">Sort Date</label>
+          <select
+              className="filter-select"
+              value={filters.sortOrder}
+              onChange={(e) => handleFilterChange("sortOrder", e.target.value)}
+          >
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+          </select>
+        </div>
+        
         <div className="filter-group">
           <label className="filter-label">Start Date</label>
           <input
@@ -43,24 +55,14 @@ export default function ReadingHistory({
             onChange={(e) => handleFilterChange("startDate", e.target.value)}
           />
         </div>
-
-        <div className="filter-group">
-          <label className="filter-label">Sort</label>
-          <select
-            className="filter-select"
-            value={filters.sortOrder}
-            onChange={(e) => handleFilterChange("sortOrder", e.target.value)}
-          >
-            <option value="desc">Newest First</option>
-            <option value="asc">Oldest First</option>
-          </select>
-        </div>
       </div>
 
-      {isLoading ? <p className="dashboard-loading">Loading reading history...</p> : null}
+      {isLoading ? <p className="dashboard-loading">Accessing logs...</p> : null}
 
       {!isLoading && readings.length === 0 ? (
-        <p className="dashboard-list-empty">No readings found matching filters.</p>
+        <div className="dashboard-list-empty">
+          <p>No activity recorded yet for this session.</p>
+        </div>
       ) : null}
 
       {!isLoading && readings.length > 0 ? (
@@ -68,17 +70,34 @@ export default function ReadingHistory({
           <div className="dashboard-list">
             {readings.map((reading) => (
               <article key={reading._id} className="dashboard-list-item">
-                <div className="dashboard-list-row">
-                  <p className="dashboard-list-title">{formatWeight(reading.weight)}</p>
-                  <p className="dashboard-list-meta">{formatDateTime(reading.timestamp)}</p>
+                <div className="dashboard-list-row" style={{ marginBottom: '0.75rem' }}>
+                  <div className="dashboard-list-content">
+                    <p className="dashboard-list-title" style={{ fontSize: '1.25rem' }}>
+                      {formatWeight(reading.weight)}
+                    </p>
+                    <p className="dashboard-list-meta">{formatDateTime(reading.timestamp)}</p>
+                  </div>
+                  {reading.vibration && (
+                    <span className="status-badge status-open" style={{ height: 'fit-content' }}>
+                      Vibration
+                    </span>
+                  )}
                 </div>
-                <p className="dashboard-list-subtitle">
-                  vibration: {formatBoolean(reading.vibration)} | buzzer: {formatBoolean(reading.buzzerOn)} |
-                  led: {formatBoolean(reading.ledOn)}
-                </p>
-                <p className="dashboard-list-meta">
-                  WiFi: {reading.wifiSignal} dBm | IP: {reading.ipAddress}
-                </p>
+                
+                <div className="dashboard-list-row" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <div className="status-badge" style={{ background: 'var(--accent)', color: 'var(--secondary)', border: '1px solid var(--card-border)' }}>
+                    Buzzer: {formatBoolean(reading.buzzerOn)}
+                  </div>
+                  <div className="status-badge" style={{ background: 'var(--accent)', color: 'var(--secondary)', border: '1px solid var(--card-border)' }}>
+                    LED: {formatBoolean(reading.ledOn)}
+                  </div>
+                  <div className="status-badge" style={{ background: 'var(--accent)', color: 'var(--secondary)', border: '1px solid var(--card-border)' }}>
+                      WiFi: {reading.wifiSignal} dBm
+                  </div>
+                   <div className="status-badge" style={{ background: 'var(--accent)', color: 'var(--secondary)', border: '1px solid var(--card-border)' }}>
+                      IP: {reading.ipAddress}
+                  </div>
+                </div>
               </article>
             ))}
           </div>
@@ -92,7 +111,7 @@ export default function ReadingHistory({
               Previous
             </button>
             <span className="dashboard-pagination-info">
-              {meta.page} / {meta.totalPages || 1}
+              {meta.page} of {meta.totalPages || 1}
             </span>
             <button
               className="dashboard-pagination-btn"

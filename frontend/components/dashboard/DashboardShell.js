@@ -37,7 +37,7 @@ export default function DashboardShell({ token, user, onLogout }) {
   } = useDashboardData({ token });
 
   const greeting = useMemo(() => {
-    return user?.name ? `Welcome, ${user.name}` : "Welcome";
+    return user?.name ? `Hello, ${user.name}` : "Hello";
   }, [user?.name]);
 
   return (
@@ -46,16 +46,16 @@ export default function DashboardShell({ token, user, onLogout }) {
         <header className="dashboard-header">
           <div className="dashboard-header-row">
             <div>
-              <h1 className="dashboard-title">Dashboard</h1>
-              <p className="dashboard-subtitle">{greeting}</p>
+              <h1 className="dashboard-title">IoT Monitoring Console</h1>
+              <p className="dashboard-subtitle">{greeting} • Manage your connected hardware</p>
             </div>
             <div className="dashboard-actions">
-              <button type="button" className="dashboard-button" onClick={onLogout}>
-                Logout
+              <button type="button" className="dashboard-button" style={{ background: 'var(--accent)', color: 'var(--foreground)', border: '1px solid var(--card-border)' }} onClick={onLogout}>
+                Sign Out
               </button>
             </div>
           </div>
-          {error ? <p className="dashboard-error">{error}</p> : null}
+          {error ? <p className="dashboard-error" style={{ marginTop: '1rem' }}>{error}</p> : null}
         </header>
 
         <DeviceSelector
@@ -66,7 +66,7 @@ export default function DashboardShell({ token, user, onLogout }) {
         />
 
         <div className="dashboard-grid">
-          <div className="dashboard-grid-main">
+          <main className="dashboard-grid-main">
             <LiveStatusCard device={currentDevice} isLoading={isLoadingDevices || isLoadingDetails} />
             <ReadingHistory
               readings={readingHistory}
@@ -76,8 +76,8 @@ export default function DashboardShell({ token, user, onLogout }) {
               filters={readingFilters}
               onFilterChange={setReadingFilters}
             />
-          </div>
-          <div className="dashboard-grid-side">
+          </main>
+          <aside className="dashboard-grid-side">
             <AlertsList
               alerts={allAlerts}
               isLoading={isLoadingDetails || isAlertsLoading}
@@ -88,7 +88,7 @@ export default function DashboardShell({ token, user, onLogout }) {
               activeTab={alertTab}
               onTabChange={setAlertTab}
             />
-          </div>
+          </aside>
         </div>
       </div>
     </div>
