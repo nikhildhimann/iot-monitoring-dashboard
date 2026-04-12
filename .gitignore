@@ -28,3 +28,6 @@ Thumbs.db
 
 # Misc
 *.tsbuildinfo
+*.pyc
+__pycache__/
+.codex/
