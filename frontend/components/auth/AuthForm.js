@@ -39,7 +39,7 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
     <form onSubmit={handleSubmit} className="auth-form">
       {isSignup ? (
         <div className="auth-field">
-          <label htmlFor="name" className="auth-label">Name</label>
+          <label htmlFor="name" className="auth-label">Full Name</label>
           <input
             id="name"
             name="name"
@@ -48,7 +48,7 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
             value={formValues.name}
             onChange={handleChange}
             disabled={isSubmitting}
-            placeholder="John Doe"
+            placeholder="e.g. John Doe"
             required
           />
         </div>
@@ -64,7 +64,7 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
           value={formValues.email}
           onChange={handleChange}
           disabled={isSubmitting}
-          placeholder="name@example.com"
+          placeholder="e.g. name@example.com"
           required
         />
       </div>
@@ -88,7 +88,7 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
       {error ? <p className="auth-error">{error}</p> : null}
 
       <button type="submit" className="auth-submit" disabled={isSubmitting}>
-        {isSubmitting ? "Processing..." : isSignup ? "Get Started" : "Sign In"}
+        {isSubmitting ? "Processing..." : isSignup ? "Create Account" : "Sign In to Dashboard"}
       </button>
     </form>
   );

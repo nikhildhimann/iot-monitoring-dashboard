@@ -48,7 +48,8 @@ export function useDashboardData({ token }) {
   // Paginated Alerts (Open vs History)
   const [alertTab, setAlertTab] = useState("open"); // "open" or "history"
   const [allAlerts, setAllAlerts] = useState([]);
-  const [alertsMeta, setAlertsMeta] = useState({ page: 1, totalPages: 0 });
+  const [alertsMeta, setAlertsMeta] = useState({ page: 1, totalPages: 0, total: 0 });
+  const [totalOpenAlerts, setTotalOpenAlerts] = useState(0);
   const [alertsPage, setAlertsPage] = useState(1);
   const [isAlertsLoading, setIsAlertsLoading] = useState(false);
 
@@ -126,6 +127,7 @@ export function useDashboardData({ token }) {
 
         setAllAlerts(alertsRes.data.alerts);
         setAlertsMeta(alertsRes.meta);
+        setTotalOpenAlerts(alertsRes.meta.total || 0);
 
         setAlerts(recentAlerts.slice(0, MAX_ALERTS));
       } catch (loadError) {
@@ -350,6 +352,18 @@ export function useDashboardData({ token }) {
     (payload) => {
       if (!payload || payload.deviceId !== selectedDeviceId) {
         return;
+      }
+
+      // Vibration & Feedback logic (Requirements 4)
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
+
+      // Visual feedback via temporary class on document or state
+      const mainElement = document.querySelector(".dashboard-grid-main");
+      if (mainElement) {
+        mainElement.classList.add("alert-pulse");
+        setTimeout(() => mainElement.classList.remove("alert-pulse"), 3000);
       }
 
       setAlerts((currentAlerts) => {

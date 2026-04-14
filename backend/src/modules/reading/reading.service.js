@@ -1,3 +1,4 @@
+import { env } from "../../config/env.js";
 import { emitDeviceSocketEvent } from "../../config/socket.js";
 import { SOCKET_EVENTS } from "../../constants/app.constants.js";
 import ApiError from "../../utils/ApiError.js";
@@ -10,8 +11,9 @@ import {
 import { validateReadingPayload } from "./reading.validation.js";
 import Reading from "./reading.model.js";
 
-const DEFAULT_HISTORY_LIMIT = 15;
-const MAX_HISTORY_LIMIT = 100;
+const DEFAULT_HISTORY_LIMIT = env.DEFAULT_HISTORY_LIMIT;
+const MAX_HISTORY_LIMIT = env.MAX_HISTORY_LIMIT;
+
 
 const toPlainObject = (document) => {
   return typeof document?.toObject === "function" ? document.toObject() : document;

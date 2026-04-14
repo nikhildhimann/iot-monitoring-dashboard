@@ -37,8 +37,8 @@ export default function SignupPage() {
   return (
     <main className="page-shell auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Create Account</h1>
-        <p className="auth-subtitle">Join us to start monitoring your IoT data</p>
+        <h1 className="auth-title">Get Started.</h1>
+        <p className="auth-subtitle">Create an account to start tracking your IoT metrics.</p>
 
         <AuthForm
           mode="signup"

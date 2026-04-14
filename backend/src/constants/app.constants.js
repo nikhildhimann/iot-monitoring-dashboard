@@ -1,7 +1,10 @@
-export const API_PREFIX = "/api";
-export const HEALTH_ROUTE = "/health";
-export const JSON_BODY_LIMIT = "256kb";
-export const DEVICE_ROOM_PREFIX = "device:";
+import { env } from "../config/env.js";
+
+export const API_PREFIX = env.API_PREFIX;
+export const HEALTH_ROUTE = env.HEALTH_ROUTE;
+export const JSON_BODY_LIMIT = env.JSON_BODY_LIMIT;
+export const DEVICE_ROOM_PREFIX = env.DEVICE_ROOM_PREFIX;
+
 
 export const SOCKET_EVENTS = Object.freeze({
   CONNECTION: "connection",

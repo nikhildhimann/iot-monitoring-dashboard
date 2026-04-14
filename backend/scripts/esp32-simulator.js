@@ -1,8 +1,38 @@
-const API_URL = process.env.API_URL || "http://localhost:5000/api/readings";
-const DEVICE_ID = process.env.DEVICE_ID || "ESP32_SIM_001";
-const MIN_DELAY_MS = Number(process.env.MIN_DELAY_MS || 2000);
-const MAX_DELAY_MS = Number(process.env.MAX_DELAY_MS || 5000);
-const MAX_MESSAGES = Number(process.env.MAX_MESSAGES || 0);
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Look for .env in the backend directory (one level up from scripts)
+dotenv.config({ path: join(__dirname, "..", ".env") });
+
+
+const getEnvOrThrow = (key) => {
+  const value = process.env[key];
+  if (!value) {
+    console.error(`[FATAL ERROR] ${key} is required but not defined in environment`);
+    process.exit(1);
+  }
+  return value;
+};
+
+const getEnvNumOrThrow = (key) => {
+  const value = Number(getEnvOrThrow(key));
+  if (Number.isNaN(value)) {
+    console.error(`[FATAL ERROR] ${key} must be a valid number, received "${process.env[key]}"`);
+    process.exit(1);
+  }
+  return value;
+};
+
+const API_URL = getEnvOrThrow("API_URL");
+const DEVICE_ID = getEnvOrThrow("DEVICE_ID");
+const MIN_DELAY_MS = getEnvNumOrThrow("MIN_DELAY_MS");
+const MAX_DELAY_MS = getEnvNumOrThrow("MAX_DELAY_MS");
+const MAX_MESSAGES = Number(process.env.MAX_MESSAGES) || 0; // 0 for infinity is a logic choice, but I'll make it configurable too
+
 
 let sentCount = 0;
 let timer = null;

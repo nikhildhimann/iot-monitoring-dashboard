@@ -38,8 +38,8 @@ export default function LoginPage() {
   return (
     <main className="page-shell auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Log in to manage your IoT devices</p>
+        <h1 className="auth-title">Welcome back.</h1>
+        <p className="auth-subtitle">Log in to your account to monitor your hardware.</p>
         
         <AuthForm
           mode="login"
