@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 
 import { useDashboardData } from "@/hooks/useDashboardData";
 import ThemeToggle from "@/components/ThemeToggle";
+import InstallAppButton from "@/components/InstallAppButton";
+import PushNotificationRequest from "@/components/PushNotificationRequest";
 import AlertsList from "./AlertsList";
 import DeviceSelector from "./DeviceSelector";
 import LiveStatusCard from "./LiveStatusCard";
@@ -39,6 +41,7 @@ export default function DashboardShell({ token, user, onLogout }) {
     setSelectedDeviceId,
     onClearAlert,
     onClearAllAlerts,
+    totalOpenAlerts,
   } = useDashboardData({ token });
 
   const greeting = useMemo(() => {
@@ -48,6 +51,7 @@ export default function DashboardShell({ token, user, onLogout }) {
   return (
     <div className="page-shell">
       <div className="dashboard-page">
+        <PushNotificationRequest />
         <header className="dashboard-header">
           <div className="dashboard-header-row">
             <div>
@@ -62,9 +66,10 @@ export default function DashboardShell({ token, user, onLogout }) {
                 aria-label="Notifications"
               >
                 <span>🔔</span>
-                {alerts.length > 0 && <span className="notification-badge">{alerts.length}</span>}
+                {totalOpenAlerts > 0 && <span className="notification-badge">{totalOpenAlerts}</span>}
               </button>
 
+              <InstallAppButton />
               <ThemeToggle />
               
               <button
@@ -73,7 +78,6 @@ export default function DashboardShell({ token, user, onLogout }) {
                 style={{ padding: '0.5rem 1rem', height: '40px' }}
                 onClick={() => setShowLogoutConfirm(true)}
               >
-                <img src="/logout.png" alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
                 <span className="btn-text">Sign Out</span>
               </button>
 
@@ -103,19 +107,7 @@ export default function DashboardShell({ token, user, onLogout }) {
               <LiveStatusCard device={currentDevice} isLoading={isLoadingDevices || isLoadingDetails} />
             </div>
 
-            {/* Desktop Only Alerts View - hidden on mobile as per requirement 2/5 */}
-            <div className="device-alerts desktop-only">
-               <AlertsList
-                alerts={allAlerts}
-                isLoading={isLoadingDetails || isAlertsLoading}
-                meta={alertsMeta}
-                onPageChange={setAlertsPage}
-                onClear={onClearAlert}
-                onClearAll={onClearAllAlerts}
-                activeTab={alertTab}
-                onTabChange={setAlertTab}
-              />
-            </div>
+
 
             <div className="device-history">
               <ReadingHistory

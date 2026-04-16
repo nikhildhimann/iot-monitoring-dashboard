@@ -59,6 +59,10 @@ export function useDashboardData({ token }) {
   const devicesRef = useRef([]);
   const latestDetailsRequestRef = useRef(0);
 
+  // Sensory feedback safety
+  const lastVibrationTimeRef = useRef(0);
+  const lastVibratedAlertIdRef = useRef("");
+
   const handleRequestError = useCallback(
     (requestError, fallbackMessage) => {
       if (requestError?.status === 401) {
@@ -354,22 +358,65 @@ export function useDashboardData({ token }) {
         return;
       }
 
-      // Vibration & Feedback logic (Requirements 4)
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate([200, 100, 200]);
+      // Sensory feedback safety checks
+      const now = Date.now();
+      const COOLDOWN_MS = 2500;
+
+      if (lastVibratedAlertIdRef.current !== payload._id && (now - lastVibrationTimeRef.current > COOLDOWN_MS)) {
+        lastVibratedAlertIdRef.current = payload._id;
+        lastVibrationTimeRef.current = now;
+
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          // Mobile Vibration
+          navigator.vibrate([200, 100, 200]);
+        } else {
+          // Desktop Fallback
+          const mainElement = document.querySelector(".dashboard-grid-main");
+          if (mainElement) {
+            mainElement.classList.add("alert-pulse");
+            setTimeout(() => mainElement.classList.remove("alert-pulse"), COOLDOWN_MS);
+          }
+        }
       }
 
-      // Visual feedback via temporary class on document or state
-      const mainElement = document.querySelector(".dashboard-grid-main");
-      if (mainElement) {
-        mainElement.classList.add("alert-pulse");
-        setTimeout(() => mainElement.classList.remove("alert-pulse"), 3000);
+      // Native Push Notification
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "granted") {
+          const bodyMessage = payload.message || `New alert triggered: ${payload.type}`;
+          
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.showNotification("AlertSense", {
+                body: bodyMessage,
+                icon: "/icon-192.png",
+                badge: "/icon-192.png",
+                data: { url: "/?tab=history" }, // Navigate to alerts view natively
+                tag: payload._id || "alert-new",
+              });
+            }).catch(() => {
+              // Fallback
+              new Notification("AlertSense", {
+                body: bodyMessage,
+                icon: "/icon-192.png"
+              });
+            });
+          } else {
+            // Desktop fallback
+            new Notification("AlertSense", {
+              body: bodyMessage,
+              icon: "/icon-192.png"
+            });
+          }
+        }
       }
 
       setAlerts((currentAlerts) => {
         if (currentAlerts.some((alert) => alert._id === payload._id)) {
           return currentAlerts;
         }
+
+        // Increment the total open alerts badge natively
+        setTotalOpenAlerts(prev => prev + 1);
 
         return [payload, ...currentAlerts].slice(0, MAX_ALERTS);
       });
@@ -405,6 +452,8 @@ export function useDashboardData({ token }) {
 
       const { types, status, resolvedAt } = payload;
 
+      setTotalOpenAlerts(prev => Math.max(0, prev - types.length));
+
       // Update both views
       setAlerts((current) => current.filter((a) => !types.includes(a.type)));
 
@@ -439,6 +488,13 @@ export function useDashboardData({ token }) {
     async (alertId) => {
       try {
         await clearAlertApi(token, alertId);
+        
+        // Find if this alert was in open state before decreasing metric
+        const targetAlert = allAlerts.find(a => a._id === alertId) || alerts.find(a => a._id === alertId);
+        if (targetAlert?.status === 'open') {
+           setTotalOpenAlerts(prev => Math.max(0, prev - 1));
+        }
+
         setAlerts((current) => current.filter((a) => a._id !== alertId));
         if (alertTab === "open") {
           setAllAlerts((current) => current.filter((a) => a._id !== alertId));
@@ -462,6 +518,7 @@ export function useDashboardData({ token }) {
     try {
       await clearAllAlertsApi(token, selectedDeviceId);
       setAlerts([]);
+      setTotalOpenAlerts(0);
       if (alertTab === "open") {
         setAllAlerts([]);
         setAlertsMeta((prev) => ({ ...prev, total: 0, totalPages: 0 }));
@@ -501,6 +558,7 @@ export function useDashboardData({ token }) {
       alertTab,
       setAlertTab,
       allAlerts, // paginated list
+      totalOpenAlerts, // Export real-time unread value
       alertsMeta,
       alertsPage,
       setAlertsPage,
@@ -520,6 +578,7 @@ export function useDashboardData({ token }) {
       isAlertsLoading,
       alertTab,
       currentDevice,
+      totalOpenAlerts,
       devices,
       error,
       isLoadingDetails,

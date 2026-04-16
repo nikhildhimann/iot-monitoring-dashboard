@@ -2,6 +2,7 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import SplashScreen from "@/components/SplashScreen";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,9 +19,15 @@ const outfit = Outfit({
 export const metadata = {
   title: "AlertSense",
   description: "Advanced IoT Monitoring Dashboard",
+  manifest: "/manifest.json",
   icons: {
-    icon: "/logo.png",
+    icon: "/favicon.ico",
+    apple: "/icon-192.png",
   },
+};
+
+export const viewport = {
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({ children }) {
@@ -45,7 +52,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={inter.className}>
-
+        <SplashScreen />
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
         </ThemeProvider>
