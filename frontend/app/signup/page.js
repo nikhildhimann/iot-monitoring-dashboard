@@ -15,8 +15,10 @@ export default function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // Prefetch dashboard for instant navigation
+    router.prefetch('/dashboard');
     if (isHydrated && isAuthenticated) {
-      router.replace("/dashboard");
+      router.replace('/dashboard');
     }
   }, [isAuthenticated, isHydrated, router]);
 
@@ -37,8 +39,13 @@ export default function SignupPage() {
   return (
     <main className="page-shell auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Get Started.</h1>
-        <p className="auth-subtitle">Create an account to start tracking your IoT metrics.</p>
+        <div className="auth-branding">
+          <img src="/icon-192.png" alt="" className="auth-logo" />
+          <span className="auth-app-name">AlertSense</span>
+        </div>
+
+        <h1 className="auth-title">Create your AlertSense account</h1>
+        <p className="auth-subtitle">Start monitoring in seconds</p>
 
         <AuthForm
           mode="signup"
@@ -48,7 +55,7 @@ export default function SignupPage() {
         />
 
         <div className="auth-footer">
-          Already have an account? <Link href="/login" className="auth-link">Login here</Link>
+          Already have an account? <Link href="/login" className="auth-link">Sign in</Link>
         </div>
       </div>
     </main>

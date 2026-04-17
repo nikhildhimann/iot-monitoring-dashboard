@@ -6,34 +6,38 @@ export default function SplashScreen() {
   const [show, setShow] = useState(false);
   const [fade, setFade] = useState(false);
 
+  const [isFirstVisit, setIsFirstVisit] = useState(false);
+
   useEffect(() => {
-    // Check if it's the first load of the session
-    const hasShownSplash = sessionStorage.getItem("splashShown");
-    
-    if (!hasShownSplash) {
-      // Don't show if installed PWA standalone mode (optional, but requested for app-like web experience too)
-      // Actually, PWA splash screen is handled by OS natively, so it might show twice. 
-      // It's sometimes best not to show web-based splash if standalone, but the prompt says 
-      // "Add a splash screen for the PWA to enhance app-like experience" which could mean they want our custom one.
-      
-      setShow(true);
-      
-      // Start fading out after 1.2 seconds
-      const fadeTimer = setTimeout(() => {
-        setFade(true);
-      }, 1200);
+    // Check if user has ever seen the long branding splash
+    const hasSeenSplash = localStorage.getItem("hasSeenSplash");
+    const first = !hasSeenSplash;
+    setIsFirstVisit(first);
 
-      // Completely remove component after animation finishes (1.7 seconds total)
-      const removeTimer = setTimeout(() => {
-        setShow(false);
-        sessionStorage.setItem("splashShown", "true");
-      }, 1700);
+    // Show splash initially
+    setShow(true);
 
-      return () => {
-        clearTimeout(fadeTimer);
-        clearTimeout(removeTimer);
-      };
-    }
+    // Timing constants (Further reduced for snappier branding)
+    const FADE_DELAY = first ? 1500 : 200;
+    const REMOVE_DELAY = first ? 2000 : 500;
+
+    // Start fading out
+    const fadeTimer = setTimeout(() => {
+      setFade(true);
+    }, FADE_DELAY);
+
+    // Completely remove component
+    const removeTimer = setTimeout(() => {
+      setShow(false);
+      if (first) {
+        localStorage.setItem("hasSeenSplash", "true");
+      }
+    }, REMOVE_DELAY);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
   }, []);
 
   if (!show) return null;
@@ -62,7 +66,7 @@ export default function SplashScreen() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          animation: 'splashPulse 1.2s ease-in-out'
+          animation: `splashPulse ${isFirstVisit ? '1.5s' : '0.5s'} ease-in-out forwards`
         }}
       >
         <img 
@@ -86,9 +90,10 @@ export default function SplashScreen() {
       </div>
       <style>{`
         @keyframes splashPulse {
-          0% { transform: scale(0.9); opacity: 0; }
-          40% { transform: scale(1.05); opacity: 1; }
-          100% { transform: scale(1); opacity: 1; }
+          0% { transform: scale(0.85); opacity: 0; }
+          20% { transform: scale(1.02); opacity: 1; }
+          40% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(1.05); opacity: 1; }
         }
       `}</style>
     </div>

@@ -26,15 +26,6 @@ const withPWA = withPWAInit({
 const nextConfig = {
   output: "standalone",
   poweredByHeader: false,
-  experimental: {
-    allowedDevOrigins: [
-      "http://localhost:3000",
-      "localhost:3000",
-      "10.166.131.211",
-      "10.166.131.211:3000",
-      "http://10.166.131.211:3000",
-    ],
-  },
   async headers() {
     return [
       {

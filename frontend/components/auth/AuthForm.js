@@ -88,7 +88,7 @@ export default function AuthForm({ mode, onSubmit, isSubmitting = false, error =
       {error ? <p className="auth-error">{error}</p> : null}
 
       <button type="submit" className="auth-submit" disabled={isSubmitting}>
-        {isSubmitting ? "Processing..." : isSignup ? "Create Account" : "Sign In to Dashboard"}
+        {isSubmitting ? "Processing..." : isSignup ? "Create Account" : "Sign In"}
       </button>
     </form>
   );

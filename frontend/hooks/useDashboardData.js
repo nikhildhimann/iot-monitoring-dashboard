@@ -22,7 +22,7 @@ const areDevicesEqual = (firstDevice, secondDevice) => {
   return JSON.stringify(firstDevice) === JSON.stringify(secondDevice);
 };
 
-export function useDashboardData({ token }) {
+export function useDashboardData({ token, socketEnabled = true }) {
   const { logout } = useAuth();
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
@@ -533,7 +533,7 @@ export function useDashboardData({ token }) {
   }, [token, selectedDeviceId, handleRequestError, alertTab]);
 
   useDashboardSocket({
-    enabled: Boolean(token),
+    enabled: socketEnabled && Boolean(token),
     selectedDeviceId,
     onReadingUpdate: handleReadingUpdate,
     onDeviceUpdate: handleDeviceUpdate,

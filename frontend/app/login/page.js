@@ -15,8 +15,10 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // Prefetch dashboard for instant navigation
+    router.prefetch('/dashboard');
     if (isHydrated && isAuthenticated) {
-      router.replace("/dashboard");
+      router.replace('/dashboard');
     }
   }, [isAuthenticated, isHydrated, router]);
 
@@ -38,8 +40,13 @@ export default function LoginPage() {
   return (
     <main className="page-shell auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Welcome back.</h1>
-        <p className="auth-subtitle">Log in to your account to monitor your hardware.</p>
+        <div className="auth-branding">
+          <img src="/icon-192.png" alt="" className="auth-logo" />
+          <span className="auth-app-name">AlertSense</span>
+        </div>
+        
+        <h1 className="auth-title">Welcome to AlertSense</h1>
+        <p className="auth-subtitle">Sign in to monitor your devices</p>
         
         <AuthForm
           mode="login"
@@ -49,7 +56,7 @@ export default function LoginPage() {
         />
         
         <div className="auth-footer">
-          Don&apos;t have an account? <Link href="/signup" className="auth-link">Create one</Link>
+          Don&apos;t have an account? <Link href="/signup" className="auth-link">Sign up</Link>
         </div>
       </div>
     </main>

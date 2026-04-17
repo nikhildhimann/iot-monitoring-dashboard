@@ -1,19 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
+import { useMemo, useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import ThemeToggle from "@/components/ThemeToggle";
 import InstallAppButton from "@/components/InstallAppButton";
 import PushNotificationRequest from "@/components/PushNotificationRequest";
-import AlertsList from "./AlertsList";
 import DeviceSelector from "./DeviceSelector";
-import LiveStatusCard from "./LiveStatusCard";
-import ReadingHistory from "./ReadingHistory";
+
+const LiveStatusCard = dynamic(() => import("./LiveStatusCard"), {
+  ssr: false,
+  loading: () => <div className="skeleton" style={{ height: "150px", marginBottom: "1rem" }} />,
+});
+const AlertsList = dynamic(() => import("./AlertsList"), {
+  ssr: false,
+  loading: () => <div className="skeleton" style={{ height: "200px", marginBottom: "1rem" }} />,
+});
+const ReadingHistory = dynamic(() => import("./ReadingHistory"), {
+  ssr: false,
+  loading: () => <div className="skeleton" style={{ height: "250px", marginBottom: "1rem" }} />,
+});
 
 export default function DashboardShell({ token, user, onLogout }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const [socketEnabled, setSocketEnabled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Enable UI and socket after first mount
+  useEffect(() => {
+    setShowDetails(true);
+    setSocketEnabled(true);
+  }, []);
 
 
   const {
@@ -42,7 +60,7 @@ export default function DashboardShell({ token, user, onLogout }) {
     onClearAlert,
     onClearAllAlerts,
     totalOpenAlerts,
-  } = useDashboardData({ token });
+  } = useDashboardData({ token, socketEnabled });
 
   const greeting = useMemo(() => {
     return user?.name ? `Hello, ${user.name}` : "Hello";
@@ -104,35 +122,45 @@ export default function DashboardShell({ token, user, onLogout }) {
         <div className="dashboard-grid">
           <main className="dashboard-grid-main">
             <div className="device-live-status">
-              <LiveStatusCard device={currentDevice} isLoading={isLoadingDevices || isLoadingDetails} />
+              {showDetails ? (
+                <LiveStatusCard device={currentDevice} isLoading={isLoadingDevices || isLoadingDetails} />
+              ) : (
+                <div className="skeleton" style={{ height: "150px" }} />
+              )}
             </div>
 
-
-
             <div className="device-history">
-              <ReadingHistory
-                readings={readingHistory}
-                isLoading={isLoadingDetails || isHistoryLoading}
-                meta={readingsMeta}
-                onPageChange={setReadingsPage}
-                filters={readingFilters}
-                onFilterChange={setReadingFilters}
-                isMobilePreview={true}
-              />
+              {showDetails ? (
+                <ReadingHistory
+                  readings={readingHistory}
+                  isLoading={isLoadingDetails || isHistoryLoading}
+                  meta={readingsMeta}
+                  onPageChange={setReadingsPage}
+                  filters={readingFilters}
+                  onFilterChange={setReadingFilters}
+                  isMobilePreview={true}
+                />
+              ) : (
+                <div className="skeleton" style={{ height: "250px" }} />
+              )}
             </div>
           </main>
 
           <aside className="dashboard-grid-side desktop-only-aside">
-            <AlertsList
-              alerts={allAlerts}
-              isLoading={isLoadingDetails || isAlertsLoading}
-              meta={alertsMeta}
-              onPageChange={setAlertsPage}
-              onClear={onClearAlert}
-              onClearAll={onClearAllAlerts}
-              activeTab={alertTab}
-              onTabChange={setAlertTab}
-            />
+            {showDetails ? (
+              <AlertsList
+                alerts={allAlerts}
+                isLoading={isLoadingDetails || isAlertsLoading}
+                meta={alertsMeta}
+                onPageChange={setAlertsPage}
+                onClear={onClearAlert}
+                onClearAll={onClearAllAlerts}
+                activeTab={alertTab}
+                onTabChange={setAlertTab}
+              />
+            ) : (
+              <div className="skeleton" style={{ height: "400px" }} />
+            )}
           </aside>
         </div>
 
