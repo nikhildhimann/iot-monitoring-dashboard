@@ -24,7 +24,6 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
   poweredByHeader: false,
   async headers() {
     return [
