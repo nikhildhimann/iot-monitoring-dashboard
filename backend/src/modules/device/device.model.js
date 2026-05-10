@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import validator from "validator";
-
 import { DEVICE_STATUS } from "../../constants/deviceStatus.js";
 
 const deviceSchema = new mongoose.Schema(
@@ -51,7 +49,7 @@ const deviceSchema = new mongoose.Schema(
       type: Number,
       min: -120,
       max: 0,
-      default: -120,
+      default: null,
     },
     uptime: {
       type: Number,
@@ -61,11 +59,7 @@ const deviceSchema = new mongoose.Schema(
     ipAddress: {
       type: String,
       trim: true,
-      default: "",
-      validate: {
-        validator: (value) => value === "" || validator.isIP(value),
-        message: "Please provide a valid IP address",
-      },
+      default: null,
     },
     lastReadingAt: {
       type: Date,

@@ -237,9 +237,12 @@ export function useDashboardData({ token, socketEnabled = true }) {
 
         setSelectedDeviceId((currentId) => {
           if (currentId && fetchedDevices.some((device) => device.deviceId === currentId)) {
+            const selectedDevice = fetchedDevices.find((device) => device.deviceId === currentId);
+            setCurrentDevice(selectedDevice || fetchedDevices[0]);
             return currentId;
           }
 
+          setCurrentDevice(fetchedDevices[0]);
           return fetchedDevices[0].deviceId;
         });
       } catch (loadError) {
@@ -314,40 +317,43 @@ export function useDashboardData({ token, socketEnabled = true }) {
 
   const handleDeviceUpdate = useCallback(
     (payload) => {
-      if (!payload || payload.deviceId !== selectedDeviceId) {
+      if (!payload?.deviceId) {
         return;
       }
 
-      setCurrentDevice((currentDeviceValue) => {
-        if (areDevicesEqual(currentDeviceValue, payload)) {
-          return currentDeviceValue;
-        }
-
-        return payload;
-      });
-
       setDevices((currentDevices) => {
-        let hasChanges = false;
-        const nextDevices = currentDevices.map((device) => {
-          if (device.deviceId !== payload.deviceId) {
-            return device;
-          }
+        const existingDevice = currentDevices.find((device) => device.deviceId === payload.deviceId);
 
-          const mergedDevice = { ...device, ...payload };
-
-          if (!areDevicesEqual(device, mergedDevice)) {
-            hasChanges = true;
-          }
-
-          return mergedDevice;
-        });
-
-        if (nextDevices.some((device) => device.deviceId === payload.deviceId)) {
-          return hasChanges ? nextDevices : currentDevices;
+        if (!existingDevice) {
+          return [payload, ...currentDevices].slice(0, 10);
         }
 
-        return [payload, ...currentDevices].slice(0, 10);
+        const mergedDevice = { ...existingDevice, ...payload };
+
+        if (areDevicesEqual(existingDevice, mergedDevice)) {
+          return currentDevices;
+        }
+
+        return currentDevices.map((device) =>
+          device.deviceId === payload.deviceId ? mergedDevice : device,
+        );
       });
+
+      if (!selectedDeviceId) {
+        setSelectedDeviceId(payload.deviceId);
+        setCurrentDevice(payload);
+        return;
+      }
+
+      if (payload.deviceId === selectedDeviceId) {
+        setCurrentDevice((currentDeviceValue) => {
+          if (areDevicesEqual(currentDeviceValue, payload)) {
+            return currentDeviceValue;
+          }
+
+          return payload;
+        });
+      }
     },
     [selectedDeviceId],
   );

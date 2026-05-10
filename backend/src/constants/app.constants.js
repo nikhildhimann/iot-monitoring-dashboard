@@ -14,4 +14,5 @@ export const SOCKET_EVENTS = Object.freeze({
   DEVICE_UPDATE: "device:update",
   READING_UPDATE: "reading:update",
   ALERT_NEW: "alert:new",
+  ALERT_UPDATE: "alert:update",
 });

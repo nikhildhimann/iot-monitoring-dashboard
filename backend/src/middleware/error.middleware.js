@@ -14,6 +14,11 @@ const errorHandler = (error, req, res, next) => {
     statusCode = 500;
   }
 
+  if (error instanceof SyntaxError && "body" in error) {
+    statusCode = 400;
+    message = "Invalid JSON payload";
+  }
+
   if (error.name === "CastError") {
     statusCode = 400;
     message = `Invalid ${error.path}`;
@@ -34,6 +39,13 @@ const errorHandler = (error, req, res, next) => {
     statusCode = 401;
     message = "Invalid or expired token";
   }
+
+  console.error("[api] request error", {
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    message,
+  });
 
   return sendResponse(res, {
     statusCode,

@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import validator from "validator";
-
 const readingSchema = new mongoose.Schema(
   {
     deviceId: {
@@ -28,9 +26,9 @@ const readingSchema = new mongoose.Schema(
     },
     wifiSignal: {
       type: Number,
-      required: true,
       min: -120,
       max: 0,
+      default: null,
     },
     uptime: {
       type: Number,
@@ -39,18 +37,18 @@ const readingSchema = new mongoose.Schema(
     },
     ipAddress: {
       type: String,
-      required: true,
       trim: true,
-      validate: {
-        validator: validator.isIP,
-        message: "Please provide a valid IP address",
-      },
+      default: null,
     },
     timestamp: {
       type: Date,
       required: true,
       default: Date.now,
       index: true,
+    },
+    deviceTimestamp: {
+      type: Date,
+      default: null,
     },
   },
   {

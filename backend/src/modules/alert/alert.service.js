@@ -70,7 +70,10 @@ const buildAlertPayload = (reading) => {
     });
   }
 
-  if (reading.wifiSignal <= env.WIFI_SIGNAL_WEAK_THRESHOLD) {
+  if (
+    typeof reading.wifiSignal === "number" &&
+    reading.wifiSignal <= env.WIFI_SIGNAL_WEAK_THRESHOLD
+  ) {
     alerts.push({
       deviceId: reading.deviceId,
       type: ALERT_TYPES.WEAK_SIGNAL,

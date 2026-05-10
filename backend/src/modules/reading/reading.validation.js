@@ -1,6 +1,6 @@
-import validator from "validator";
-
 import ApiError from "../../utils/ApiError.js";
+
+const DEFAULT_DEVICE_ID = "ESP32_001";
 
 const assertObject = (payload) => {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
@@ -8,7 +8,13 @@ const assertObject = (payload) => {
   }
 };
 
-const parseNumber = (value, fieldName) => {
+const isMissing = (value) => value === undefined || value === null || value === "";
+
+const parseOptionalNumber = (value, fieldName, defaultValue) => {
+  if (isMissing(value)) {
+    return defaultValue;
+  }
+
   const parsedValue = Number(value);
 
   if (!Number.isFinite(parsedValue)) {
@@ -18,44 +24,76 @@ const parseNumber = (value, fieldName) => {
   return parsedValue;
 };
 
-const parseBoolean = (value, fieldName) => {
-  if (typeof value !== "boolean") {
-    throw new ApiError(400, `${fieldName} must be a boolean`);
+const parseOptionalBoolean = (value, fieldName, defaultValue = false) => {
+  if (isMissing(value)) {
+    return defaultValue;
   }
 
-  return value;
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (normalizedValue === "true") {
+      return true;
+    }
+
+    if (normalizedValue === "false") {
+      return false;
+    }
+  }
+
+  throw new ApiError(400, `${fieldName} must be a boolean or string boolean`);
 };
 
-export const validateReadingPayload = (payload) => {
+const parseDeviceTimestamp = (value) => {
+  if (isMissing(value)) {
+    return null;
+  }
+
+  const timestamp = new Date(value);
+
+  return Number.isNaN(timestamp.getTime()) ? null : timestamp;
+};
+
+const normalizeDeviceId = (value) => {
+  if (isMissing(value)) {
+    return DEFAULT_DEVICE_ID;
+  }
+
+  if (typeof value !== "string") {
+    throw new ApiError(400, "deviceId must be a string");
+  }
+
+  return value.trim() || DEFAULT_DEVICE_ID;
+};
+
+const normalizeIpAddress = (payloadIpAddress, requestIpAddress) => {
+  if (typeof payloadIpAddress === "string" && payloadIpAddress.trim()) {
+    return payloadIpAddress.trim();
+  }
+
+  if (typeof requestIpAddress === "string" && requestIpAddress.trim()) {
+    return requestIpAddress.trim();
+  }
+
+  return null;
+};
+
+export const normalizeReadingPayload = (payload, { requestIpAddress } = {}) => {
   assertObject(payload);
 
-  const deviceId = String(payload.deviceId || "").trim();
-  const ipAddress = String(payload.ipAddress || "").trim();
-  const timestamp = new Date(payload.timestamp);
-  const weight = parseNumber(payload.weight, "weight");
-  const wifiSignal = parseNumber(payload.wifiSignal, "wifiSignal");
-  const uptime = parseNumber(payload.uptime, "uptime");
-  const vibration = parseBoolean(payload.vibration, "vibration");
-  const buzzerOn = parseBoolean(payload.buzzerOn, "buzzerOn");
-  const ledOn = parseBoolean(payload.ledOn, "ledOn");
-
-  if (!deviceId) {
-    throw new ApiError(400, "deviceId is required");
-  }
-
-  if (!validator.isIP(ipAddress)) {
-    throw new ApiError(400, "ipAddress must be a valid IP address");
-  }
-
-  if (Number.isNaN(timestamp.getTime())) {
-    throw new ApiError(400, "timestamp must be a valid ISO date");
-  }
+  const weight = parseOptionalNumber(payload.weight, "weight", 0);
+  const wifiSignal = parseOptionalNumber(payload.wifiSignal, "wifiSignal", null);
+  const uptime = parseOptionalNumber(payload.uptime, "uptime", 0);
 
   if (weight < 0) {
     throw new ApiError(400, "weight must be greater than or equal to 0");
   }
 
-  if (wifiSignal < -120 || wifiSignal > 0) {
+  if (wifiSignal !== null && (wifiSignal < -120 || wifiSignal > 0)) {
     throw new ApiError(400, "wifiSignal must be between -120 and 0");
   }
 
@@ -64,14 +102,17 @@ export const validateReadingPayload = (payload) => {
   }
 
   return {
-    deviceId,
+    deviceId: normalizeDeviceId(payload.deviceId),
     weight,
-    vibration,
-    buzzerOn,
-    ledOn,
+    vibration: parseOptionalBoolean(payload.vibration, "vibration", false),
+    buzzerOn: parseOptionalBoolean(payload.buzzerOn, "buzzerOn", false),
+    ledOn: parseOptionalBoolean(payload.ledOn, "ledOn", false),
     wifiSignal,
     uptime,
-    ipAddress,
-    timestamp,
+    ipAddress: normalizeIpAddress(payload.ipAddress, requestIpAddress),
+    timestamp: new Date(),
+    deviceTimestamp: parseDeviceTimestamp(payload.timestamp),
   };
 };
+
+export const validateReadingPayload = normalizeReadingPayload;

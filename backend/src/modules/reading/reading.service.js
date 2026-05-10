@@ -8,7 +8,7 @@ import {
   processAlertsForReading,
   resolveOfflineAlert,
 } from "../alert/alert.service.js";
-import { validateReadingPayload } from "./reading.validation.js";
+import { normalizeReadingPayload } from "./reading.validation.js";
 import Reading from "./reading.model.js";
 
 const DEFAULT_HISTORY_LIMIT = env.DEFAULT_HISTORY_LIMIT;
@@ -40,41 +40,57 @@ export const createReadingRecord = (reading) => {
     uptime: reading.uptime,
     ipAddress: reading.ipAddress,
     timestamp: reading.timestamp,
+    deviceTimestamp: reading.deviceTimestamp,
   });
 };
 
 export const createReading = (payload) => {
-  const reading = validateReadingPayload(payload);
+  const reading = normalizeReadingPayload(payload);
 
   return createReadingRecord(reading);
 };
 
-export const ingestReadingPayload = async (payload) => {
-  const reading = validateReadingPayload(payload);
+export const ingestReadingPayload = async (payload, { requestIpAddress } = {}) => {
+  console.info("[readings] incoming payload", payload);
 
-  const [savedReading, device] = await Promise.all([
-    createReadingRecord(reading),
-    upsertLatestDeviceState({
+  try {
+    const reading = normalizeReadingPayload(payload, { requestIpAddress });
+
+    console.info("[readings] normalized payload", reading);
+
+    const savedReading = await createReadingRecord(reading);
+    const readingPayload = toPlainObject(savedReading);
+
+    console.info("[readings] saved reading", readingPayload._id);
+
+    const device = await upsertLatestDeviceState({
       reading,
       metadata: payload,
-    }),
-  ]);
+    });
 
-  const readingPayload = toPlainObject(savedReading);
-  const [alerts] = await Promise.all([
-    processAlertsForReading(reading, { emit: false }),
-    resolveOfflineAlert(reading.deviceId),
-  ]);
+    console.info("[readings] updated device", device?._id || device?.deviceId);
 
-  emitDeviceSocketEvent(SOCKET_EVENTS.READING_UPDATE, reading.deviceId, readingPayload);
-  emitDeviceSocketEvent(SOCKET_EVENTS.DEVICE_UPDATE, reading.deviceId, device);
-  emitAlerts(alerts);
+    const [alerts] = await Promise.all([
+      processAlertsForReading(reading, { emit: false }),
+      resolveOfflineAlert(reading.deviceId),
+    ]);
 
-  return {
-    reading: readingPayload,
-    device,
-    alerts,
-  };
+    emitDeviceSocketEvent(SOCKET_EVENTS.READING_UPDATE, reading.deviceId, readingPayload);
+    emitDeviceSocketEvent(SOCKET_EVENTS.DEVICE_UPDATE, reading.deviceId, device);
+    emitAlerts(alerts);
+
+    return {
+      reading: readingPayload,
+      device,
+      alerts,
+    };
+  } catch (error) {
+    console.error("[readings] ingestion error", {
+      message: error.message,
+      stack: error.stack,
+    });
+    throw error;
+  }
 };
 
 export const getReadingHistory = async ({

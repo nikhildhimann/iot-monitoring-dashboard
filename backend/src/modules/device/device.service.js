@@ -1,6 +1,6 @@
 import ApiError from "../../utils/ApiError.js";
 import { DEVICE_STATUS } from "../../constants/deviceStatus.js";
-import { validateReadingPayload } from "../reading/reading.validation.js";
+import { normalizeReadingPayload } from "../reading/reading.validation.js";
 import Device from "./device.model.js";
 
 const DEFAULT_DEVICE_LIMIT = 20;
@@ -55,7 +55,7 @@ export const upsertLatestDeviceState = ({ reading, metadata = {} }) => {
 };
 
 export const upsertDeviceHeartbeat = (payload) => {
-  const reading = validateReadingPayload(payload);
+  const reading = normalizeReadingPayload(payload);
 
   return upsertLatestDeviceState({
     reading,

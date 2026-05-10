@@ -10,7 +10,8 @@ export default function DeviceSelector({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedDevice = devices.find(d => d.deviceId === selectedDeviceId);
+  const selectedDevice = devices.find(d => d.deviceId === selectedDeviceId) || devices[0] || null;
+  const displayDeviceId = selectedDeviceId || selectedDevice?.deviceId || "";
 
   const handleSelect = (deviceId) => {
     onDeviceChange(deviceId);
@@ -23,7 +24,7 @@ export default function DeviceSelector({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
           <span className="device-selector-label">Device:</span>
           <span className="device-meta-value" style={{ fontSize: '0.95rem', fontWeight: '700' }}>
-            {selectedDevice?.name || selectedDeviceId || "None"}
+            {selectedDevice?.name || displayDeviceId || "None"}
           </span>
           {selectedDevice && (
             <span className={`status-badge ${selectedDevice.status === 'online' ? 'status-online' : 'status-offline'}`} style={{ padding: '0.1rem 0.6rem', fontSize: '0.6rem' }}>

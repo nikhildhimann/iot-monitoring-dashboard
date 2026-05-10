@@ -7,11 +7,13 @@ import {
 } from "./reading.service.js";
 
 export const createReading = asyncHandler(async (req, res) => {
-  const result = await ingestReadingPayload(req.body);
+  const result = await ingestReadingPayload(req.body, {
+    requestIpAddress: req.ip,
+  });
 
   return sendResponse(res, {
     statusCode: 201,
-    message: "Reading ingested successfully",
+    message: "Reading received",
     data: result,
   });
 });

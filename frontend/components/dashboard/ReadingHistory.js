@@ -1,6 +1,6 @@
 "use client";
 
-import { formatBoolean, formatDateTime, formatWeight } from "@/utils/formatters";
+import { formatBoolean, formatDateTime, formatWeight, formatWifiSignal } from "@/utils/formatters";
 import Link from "next/link";
 
 
@@ -146,10 +146,10 @@ export default function ReadingHistory({
                     LED: {formatBoolean(reading.ledOn)}
                   </div>
                   <div className="status-badge status-cleared">
-                      WiFi: {reading.wifiSignal} dBm
+                      WiFi: {formatWifiSignal(reading.wifiSignal)}
                   </div>
                    <div className="status-badge status-cleared">
-                      IP: {reading.ipAddress}
+                      IP: {reading.ipAddress || "N/A"}
                   </div>
                 </div>
               </article>
