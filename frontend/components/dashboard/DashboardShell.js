@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import ThemeToggle from "@/components/ThemeToggle";
 import InstallAppButton from "@/components/InstallAppButton";
-import PushNotificationRequest from "@/components/PushNotificationRequest";
 import DeviceSelector from "./DeviceSelector";
 import LiveStatusCard from "./LiveStatusCard";
 import AlertsList from "./AlertsList";
 import ReadingHistory from "./ReadingHistory";
+import MobileAlertsToggle from "@/components/MobileAlertsToggle";
 
 export default function DashboardShell({ token, user, onLogout }) {
   const [showDetails, setShowDetails] = useState(false);
@@ -72,6 +73,8 @@ export default function DashboardShell({ token, user, onLogout }) {
     totalOpenAlerts,
   } = useDashboardData({ token, socketEnabled });
 
+  const { isSubscribed: isPushActive } = usePushNotifications();
+
   const greeting = useMemo(() => {
     return user?.name ? `Hello, ${user.name}` : "Hello";
   }, [user?.name]);
@@ -81,7 +84,6 @@ export default function DashboardShell({ token, user, onLogout }) {
   return (
     <div className="page-shell">
       <div className="dashboard-page">
-        <PushNotificationRequest />
         <header className="dashboard-header">
           <div className="dashboard-header-row">
             <div className="dashboard-title-group">
@@ -97,6 +99,7 @@ export default function DashboardShell({ token, user, onLogout }) {
               >
                 <span>🔔</span>
                 {totalOpenAlerts > 0 && <span className="notification-badge">{totalOpenAlerts}</span>}
+                {isPushActive && <span className="push-active-dot" title="Mobile Alerts Enabled"></span>}
               </button>
 
               <InstallAppButton />
@@ -153,6 +156,7 @@ export default function DashboardShell({ token, user, onLogout }) {
                     >
                       Logout
                     </button>
+                    <MobileAlertsToggle />
                   </div>
                 ) : null}
               </div>

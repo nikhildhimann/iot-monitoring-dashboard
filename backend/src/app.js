@@ -8,6 +8,7 @@ import alertRoutes from "./modules/alert/alert.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import deviceRoutes from "./modules/device/device.routes.js";
 import readingRoutes from "./modules/reading/reading.routes.js";
+import pushRoutes from "./modules/push/push.routes.js";
 import errorHandler from "./middleware/error.middleware.js";
 import notFound from "./middleware/notFound.middleware.js";
 import { sendResponse } from "./utils/response.js";
@@ -68,6 +69,7 @@ apiRouter.use("/auth", authRoutes);
 apiRouter.use("/device", deviceRoutes);
 apiRouter.use("/readings", readingRoutes);
 apiRouter.use("/alerts", alertRoutes);
+apiRouter.use("/push", pushRoutes);
 
 app.use(API_PREFIX, apiRouter);
 app.use(notFound);

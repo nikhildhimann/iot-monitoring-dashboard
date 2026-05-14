@@ -8,6 +8,7 @@ import {
   processAlertsForReading,
   resolveOfflineAlert,
 } from "../alert/alert.service.js";
+import { triggerAlertPush } from "../push/push.service.js";
 import { normalizeReadingPayload } from "./reading.validation.js";
 import Reading from "./reading.model.js";
 
@@ -78,6 +79,44 @@ export const ingestReadingPayload = async (payload, { requestIpAddress } = {}) =
     emitDeviceSocketEvent(SOCKET_EVENTS.READING_UPDATE, reading.deviceId, readingPayload);
     emitDeviceSocketEvent(SOCKET_EVENTS.DEVICE_UPDATE, reading.deviceId, device);
     emitAlerts(alerts);
+
+    // Push Notification Triggers (Non-blocking)
+    if (reading.vibration) {
+      triggerAlertPush({
+        deviceId: reading.deviceId,
+        alertType: "vibration",
+        title: "AlertSense Warning",
+        body: `Vibration detected on ${reading.deviceId}`,
+      });
+    }
+
+    if (reading.buzzerOn) {
+      triggerAlertPush({
+        deviceId: reading.deviceId,
+        alertType: "buzzer",
+        title: "AlertSense Warning",
+        body: `Buzzer is ON on ${reading.deviceId}`,
+      });
+    }
+
+    if (reading.ledOn) {
+      triggerAlertPush({
+        deviceId: reading.deviceId,
+        alertType: "led",
+        title: "AlertSense Warning",
+        body: `LED alert is ON on ${reading.deviceId}`,
+      });
+    }
+
+    if (reading.weight >= env.WEIGHT_MAX_THRESHOLD) {
+      triggerAlertPush({
+        deviceId: reading.deviceId,
+        alertType: "weight",
+        title: "AlertSense Warning",
+        body: `Weight limit crossed on ${reading.deviceId}: ${reading.weight} kg`,
+        data: { weight: reading.weight },
+      });
+    }
 
     return {
       reading: readingPayload,

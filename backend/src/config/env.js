@@ -75,5 +75,12 @@ export const env = Object.freeze({
   ),
   MAX_HISTORY_LIMIT: parseNumber("MAX_HISTORY_LIMIT", process.env.MAX_HISTORY_LIMIT || "100"),
   DEVICE_ROOM_PREFIX: process.env.DEVICE_ROOM_PREFIX || "device:",
+  VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY || "",
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || "",
+  VAPID_SUBJECT: process.env.VAPID_SUBJECT || "mailto:admin@example.com",
+  PUSH_ALERT_COOLDOWN_SECONDS: parseNumber(
+    "PUSH_ALERT_COOLDOWN_SECONDS",
+    process.env.PUSH_ALERT_COOLDOWN_SECONDS || "120",
+  ),
 });
 

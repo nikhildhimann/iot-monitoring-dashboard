@@ -1705,3 +1705,15 @@ p {
   border-color: var(--primary) !important;
   box-shadow: var(--shadow-sm);
 }
+
+.push-active-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  border: 2px solid var(--background);
+  z-index: 2;
+}
