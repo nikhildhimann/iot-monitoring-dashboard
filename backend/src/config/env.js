@@ -66,6 +66,9 @@ export const env = Object.freeze({
   API_PREFIX: process.env.API_PREFIX || "/api",
   HEALTH_ROUTE: process.env.HEALTH_ROUTE || "/health",
   JSON_BODY_LIMIT: process.env.JSON_BODY_LIMIT || "1mb",
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "",
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || "",
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || "",
   DEFAULT_HISTORY_LIMIT: parseNumber(
     "DEFAULT_HISTORY_LIMIT",
     process.env.DEFAULT_HISTORY_LIMIT || "15",
@@ -73,5 +76,4 @@ export const env = Object.freeze({
   MAX_HISTORY_LIMIT: parseNumber("MAX_HISTORY_LIMIT", process.env.MAX_HISTORY_LIMIT || "100"),
   DEVICE_ROOM_PREFIX: process.env.DEVICE_ROOM_PREFIX || "device:",
 });
-
 

@@ -1,37 +1,47 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import ThemeToggle from "@/components/ThemeToggle";
 import InstallAppButton from "@/components/InstallAppButton";
 import PushNotificationRequest from "@/components/PushNotificationRequest";
 import DeviceSelector from "./DeviceSelector";
-
-const LiveStatusCard = dynamic(() => import("./LiveStatusCard"), {
-  ssr: false,
-  loading: () => <div className="skeleton" style={{ height: "150px", marginBottom: "1rem" }} />,
-});
-const AlertsList = dynamic(() => import("./AlertsList"), {
-  ssr: false,
-  loading: () => <div className="skeleton" style={{ height: "200px", marginBottom: "1rem" }} />,
-});
-const ReadingHistory = dynamic(() => import("./ReadingHistory"), {
-  ssr: false,
-  loading: () => <div className="skeleton" style={{ height: "250px", marginBottom: "1rem" }} />,
-});
+import LiveStatusCard from "./LiveStatusCard";
+import AlertsList from "./AlertsList";
+import ReadingHistory from "./ReadingHistory";
 
 export default function DashboardShell({ token, user, onLogout }) {
   const [showDetails, setShowDetails] = useState(false);
   const [socketEnabled, setSocketEnabled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
 
   // Enable UI and socket after first mount
   useEffect(() => {
     setShowDetails(true);
     setSocketEnabled(true);
   }, []);
+
+  useEffect(() => {
+    if (!isProfileMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isProfileMenuOpen]);
 
 
   const {
@@ -65,6 +75,8 @@ export default function DashboardShell({ token, user, onLogout }) {
   const greeting = useMemo(() => {
     return user?.name ? `Hello, ${user.name}` : "Hello";
   }, [user?.name]);
+  const mobileGreeting = user?.name ? `Hi, ${user.name}` : "Hi";
+  const userInitial = (user?.name || user?.email || "U").trim().charAt(0).toUpperCase();
 
   return (
     <div className="page-shell">
@@ -72,14 +84,14 @@ export default function DashboardShell({ token, user, onLogout }) {
         <PushNotificationRequest />
         <header className="dashboard-header">
           <div className="dashboard-header-row">
-            <div>
+            <div className="dashboard-title-group">
               <h1 className="dashboard-title">AlertSense</h1>
               <p className="dashboard-subtitle">{greeting} • Manage your connected hardware</p>
+              <p className="dashboard-mobile-greeting">{mobileGreeting}</p>
             </div>
             <div className="dashboard-actions">
-              {/* Notification Bell - Mobile Only */}
               <button 
-                className="notification-bell mobile-only" 
+                className="notification-bell" 
                 onClick={() => setShowNotifications(true)}
                 aria-label="Notifications"
               >
@@ -89,24 +101,61 @@ export default function DashboardShell({ token, user, onLogout }) {
 
               <InstallAppButton />
               <ThemeToggle />
-              
-              <button
-                type="button"
-                className="dashboard-button btn-secondary desktop-only"
-                style={{ padding: '0.5rem 1rem', height: '40px' }}
-                onClick={() => setShowLogoutConfirm(true)}
-              >
-                <span className="btn-text">Sign Out</span>
-              </button>
 
-              {/* Sign Out Icon - Mobile Only */}
-              <button 
-                className="logout-icon-btn mobile-only"
-                onClick={() => setShowLogoutConfirm(true)}
-                aria-label="Logout"
-              >
-                <img src="/logout.png" alt="Sign Out" style={{ width: '20px', height: '20px' }} />
-              </button>
+              <div className="profile-menu" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  className="profile-menu-trigger"
+                  onClick={() => setIsProfileMenuOpen((isOpen) => !isOpen)}
+                  aria-label="Open profile menu"
+                  aria-expanded={isProfileMenuOpen}
+                >
+                  <span className="profile-avatar profile-avatar-small">
+                    {user?.profileImageUrl ? (
+                      <img src={user.profileImageUrl} alt="" />
+                    ) : (
+                      <span>{userInitial}</span>
+                    )}
+                  </span>
+                  <span className="profile-menu-name">{user?.name || "Profile"}</span>
+                  <span className="profile-menu-arrow" aria-hidden="true">▾</span>
+                </button>
+
+                {isProfileMenuOpen ? (
+                  <div className="profile-dropdown">
+                    <div className="profile-dropdown-user">
+                      <span className="profile-avatar profile-avatar-small">
+                        {user?.profileImageUrl ? (
+                          <img src={user.profileImageUrl} alt="" />
+                        ) : (
+                          <span>{userInitial}</span>
+                        )}
+                      </span>
+                      <div className="profile-dropdown-user-text">
+                        <p className="profile-dropdown-name">{user?.name || "Profile"}</p>
+                        <p className="profile-dropdown-email">{user?.email || ""}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/profile"
+                      className="profile-dropdown-item"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      type="button"
+                      className="profile-dropdown-item profile-dropdown-danger"
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        setShowLogoutConfirm(true);
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
           {error ? <p className="dashboard-error" style={{ marginTop: '1rem' }}>{error}</p> : null}
@@ -193,8 +242,8 @@ export default function DashboardShell({ token, user, onLogout }) {
       {showLogoutConfirm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2 className="modal-title">Are you sure?</h2>
-            <p className="modal-message">Do you really want to sign out of the dashboard?</p>
+            <h2 className="modal-title">Logout?</h2>
+            <p className="modal-message">Are you sure you want to logout?</p>
             <div className="modal-actions">
               <button 
                 className="dashboard-button btn-secondary" 
@@ -206,7 +255,7 @@ export default function DashboardShell({ token, user, onLogout }) {
                 className="dashboard-button btn-danger" 
                 onClick={onLogout}
               >
-                Sign Out
+                Logout
               </button>
             </div>
           </div>

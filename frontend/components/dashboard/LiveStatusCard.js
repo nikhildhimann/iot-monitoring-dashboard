@@ -20,6 +20,19 @@ const liveFields = [
   { key: "lastReadingAt", label: "Last Reported", format: formatDateTime },
 ];
 
+const isActiveSignal = (value) => {
+  if (value === true || value === 1) {
+    return true;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "true" || normalized === "on" || normalized === "1";
+  }
+
+  return false;
+};
+
 export default function LiveStatusCard({ device, isLoading = false }) {
   const isOnline = device?.status === "online";
 
@@ -53,19 +66,16 @@ export default function LiveStatusCard({ device, isLoading = false }) {
         <div className={`device-meta-grid ${!isOnline ? "dimmed" : ""}`}>
           {liveFields.map((field) => {
             const val = device[field.key];
-            let badgeStyle = {};
-            
-            if (field.key === 'vibration' && val === true) {
-              badgeStyle = { color: 'var(--error)' };
-            }
-            if (field.key === 'buzzerOn' && val === true) {
-              badgeStyle = { color: 'var(--warning)' };
-            }
+            const isDangerActive =
+              ["vibration", "buzzerOn", "ledOn"].includes(field.key) && isActiveSignal(val);
 
             return (
-              <div key={field.key} className="device-meta-item">
+              <div
+                key={field.key}
+                className={`device-meta-item ${isDangerActive ? "device-meta-danger" : ""}`}
+              >
                 <span className="device-meta-label">{field.label}</span>
-                <span className="device-meta-value" style={badgeStyle}>
+                <span className="device-meta-value">
                   {field.format(val)}
                 </span>
               </div>
