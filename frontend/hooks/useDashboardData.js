@@ -13,6 +13,7 @@ import {
   clearAlert as clearAlertApi,
   clearAllAlerts as clearAllAlertsApi,
 } from "@/lib/api/dashboard";
+import { playAlertSound } from "@/utils/alertSound";
 import { useDashboardSocket } from "./useDashboardSocket";
 
 const MAX_ALERTS = 5;
@@ -20,6 +21,51 @@ const MAX_READINGS = 15;
 
 const areDevicesEqual = (firstDevice, secondDevice) => {
   return JSON.stringify(firstDevice) === JSON.stringify(secondDevice);
+};
+
+const activeAlertValues = new Set([true, "true", 1, "1", "on"]);
+const criticalAlertValues = new Set(["critical", "danger", "high"]);
+
+const isActiveSignal = (value) => activeAlertValues.has(value);
+
+const isCriticalReading = (reading) => {
+  if (!reading) {
+    return false;
+  }
+
+  return (
+    isActiveSignal(reading.vibration) ||
+    isActiveSignal(reading.buzzerOn) ||
+    isActiveSignal(reading.ledOn)
+  );
+};
+
+const isCriticalAlert = (alert) => {
+  if (!alert) {
+    return false;
+  }
+
+  const severity = String(alert.severity || "").toLowerCase();
+  const status = String(alert.status || "").toLowerCase();
+  const type = String(alert.type || "").toLowerCase();
+
+  return (
+    criticalAlertValues.has(severity) ||
+    criticalAlertValues.has(status) ||
+    type.includes("critical") ||
+    type.includes("danger") ||
+    isActiveSignal(alert.vibration) ||
+    isActiveSignal(alert.buzzerOn) ||
+    isActiveSignal(alert.ledOn)
+  );
+};
+
+const playForegroundAlertSound = () => {
+  if (typeof document === "undefined" || document.visibilityState !== "visible") {
+    return;
+  }
+
+  playAlertSound();
 };
 
 export function useDashboardData({ token, socketEnabled = true }) {
@@ -311,6 +357,10 @@ export function useDashboardData({ token, socketEnabled = true }) {
           return [payload, ...currentReadings].slice(0, MAX_READINGS);
         });
       }
+
+      if (isCriticalReading(payload)) {
+        playForegroundAlertSound();
+      }
     },
     [selectedDeviceId, readingsPage, readingFilters],
   );
@@ -362,6 +412,10 @@ export function useDashboardData({ token, socketEnabled = true }) {
     (payload) => {
       if (!payload || payload.deviceId !== selectedDeviceId) {
         return;
+      }
+
+      if (isCriticalAlert(payload)) {
+        playForegroundAlertSound();
       }
 
       // Sensory feedback safety checks
