@@ -1,24 +1,48 @@
 self.addEventListener("push", (event) => {
-  if (!event.data) return;
+  const fallbackPayload = {
+    title: "AlertSense Warning",
+    body: "New alert received",
+    url: "/dashboard",
+    tag: "alertsense-critical-alert",
+    data: {},
+  };
 
-  try {
-    const payload = event.data.json();
-    const { title, body, icon, badge, tag, data } = payload;
+  let payload = fallbackPayload;
 
-    const options = {
-      body: body || "New alert from AlertSense",
-      icon: icon || "/icon-192.png",
-      badge: badge || "/icon-192.png",
-      tag: tag || "alertsense-push",
-      data: data || { url: "/dashboard" },
-      vibrate: [200, 100, 200],
-      requireInteraction: false,
-    };
-
-    event.waitUntil(self.registration.showNotification(title || "AlertSense", options));
-  } catch (error) {
-    console.error("Error parsing push payload:", error);
+  if (event.data) {
+    try {
+      const parsedPayload = event.data.json();
+      if (parsedPayload && typeof parsedPayload === "object") {
+        payload = parsedPayload;
+      }
+    } catch (error) {
+      console.error("Error parsing push payload:", error);
+    }
   }
+
+  const tag = payload.tag || fallbackPayload.tag;
+  const data = payload.data && typeof payload.data === "object" ? payload.data : {};
+  const url = payload.url || data.url || fallbackPayload.url;
+
+  const options = {
+    body: payload.body || fallbackPayload.body,
+    icon: payload.icon || "/icon-192.png",
+    badge: payload.badge || "/icon-192.png",
+    tag,
+    renotify: true,
+    // Custom notification sound is controlled by OS/browser in PWA.
+    // silent:false allows default notification sound.
+    silent: false,
+    // vibrate pattern improves alert attention where supported.
+    vibrate: [300, 100, 300, 100, 500],
+    data: {
+      url,
+      ...data,
+    },
+    requireInteraction: false,
+  };
+
+  event.waitUntil(self.registration.showNotification(payload.title || fallbackPayload.title, options));
 });
 
 self.addEventListener("notificationclick", (event) => {
